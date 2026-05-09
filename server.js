@@ -185,12 +185,14 @@ io.on('connection', (socket) => {
     const frage = r.fragen[r.frage_index];
     const korrekt = idx === frage.richtig;
     r.antworten_aktuell[socket.id] = idx;
+    let punkte = 0;
     if (korrekt) {
       const bonus = Math.max(0, Math.round(((FRAGE_DAUER_MS - (Date.now() - r.frage_start)) / FRAGE_DAUER_MS) * 500));
+      punkte = 1000 + bonus;
       const sp = r.spieler.find(s => s.id === socket.id);
-      if (sp) sp.score += 1000 + bonus;
+      if (sp) sp.score += punkte;
     }
-    socket.emit('antwort_bestaetigt', { korrekt, antwort_index: idx });
+    socket.emit('antwort_bestaetigt', { korrekt, antwort_index: idx, punkte });
     if (r.spieler.every(s => r.antworten_aktuell[s.id] !== undefined)) zeige_aufloesung(r.code);
   });
 
