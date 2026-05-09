@@ -79,7 +79,13 @@ function naechste_frage(code) {
     const rangliste = [...r.spieler].sort((a, b) => b.score - a.score)
       .map((s, i) => ({ rang: i + 1, name: s.name, score: s.score }));
     io.to(code).emit('spiel_ende', { rangliste });
-    loesche_raum(code);
+    // Raum für Neustart behalten – zurück in Wartezustand
+    clearInterval(r.frage_timer); r.frage_timer = null;
+    clearTimeout(r.aufloesungs_timer); r.aufloesungs_timer = null;
+    r.fragen = []; r.frage_index = -1; r.antworten_aktuell = {};
+    r.zustand = 'warten';
+    broadcast_spieler_liste(r);
+    reset_inaktiv(r);
     return;
   }
   r.antworten_aktuell = {};
